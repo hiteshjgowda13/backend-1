@@ -19,7 +19,7 @@ const userSchema = new Schema(
             lowercase:true,
             trim:true,
         },
-        fullname:{
+        fullName:{
             type: String,
             required: true,
             trim:true,
@@ -29,7 +29,7 @@ const userSchema = new Schema(
             type: String, //cloudinary url like aws
             required:true,
         },
-        coverimage:{
+        coverImage:{
             type: String
         },
         watchHistory:[
@@ -51,11 +51,10 @@ const userSchema = new Schema(
     }
 )
 // pre: used to encrypt password just before save
-userSchema.pre("save", async function(next) {
-    if(!this.isModified("password")) return next();
+userSchema.pre("save", async function (next) {
+    if(!this.isModified("password")) return 
 //happens only when password is changed
-    this.password =await bcrypt.hash(this.password,10)
-    next()
+    this.password = await bcrypt.hash(this.password,10)
 })
 
 //password verification using bcrypt 
@@ -68,7 +67,7 @@ userSchema.methods.generateAccessToken = function (){
         {
             _id: this._id,
             email: this.email,
-            username: this.userSchema,
+            username: this.username,
             fullname: this.fullname
         },
         process.env.ACCESS_TOKEN_SECRET,
