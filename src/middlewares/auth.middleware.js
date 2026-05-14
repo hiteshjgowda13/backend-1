@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken"
 
 // if we want to omit res we replace it with underscore (_)
+//this is for secure routes assuming user is registered and logged in
 export const verifyJWT = asyncHandler(async (req, _,next) =>{
 try {
     //get access token here 

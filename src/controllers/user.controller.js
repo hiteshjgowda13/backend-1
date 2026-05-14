@@ -8,6 +8,8 @@ import jwt from "jsonwebtoken"
 
 
 const generateAccessNRefreshToken = async(userID) => {
+    //this function accepts userid 
+    //generates the refresh and access token from user model methods using jwt
     try {
         const user = await User.findById(userID)
         const refreshToken = user.generateRefreshToken()
@@ -169,6 +171,7 @@ const logoutUser = asyncHandler( async (req,res) => {
     //refresh token reset 
     //doing using middleware
     await User.findByIdAndUpdate(
+        //set is mongodb function wheich sets refresh token undefined
         req.user._id,
         {
             $set:{
@@ -179,6 +182,7 @@ const logoutUser = asyncHandler( async (req,res) => {
             new: true //used to not get back refreshtoken again
         }
     )
+    //cookie setting httponly and secure
     const options ={
         httpOnly: true,
         secure: true
@@ -191,7 +195,9 @@ const logoutUser = asyncHandler( async (req,res) => {
 })
 
 const refreshAccessToken = asyncHandler(async (req,res) => {
+// refresh access token when its expired using refresh token checking
 
+    //take incoming refresh token from cookies or body and check if given else throw error
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
     if(!incomingRefreshToken){
@@ -201,13 +207,13 @@ const refreshAccessToken = asyncHandler(async (req,res) => {
         //incoming token is in encrypted format so we hav to verify it once ie decode the incoming token
         const decodedToken = jwt.verify( incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
     
-    
+        //using jwt verify we get token use tht to verify with our userid db refresh token if valid send access
         const user = await User.findById(decodedToken?._id)
     
         if(!user){
             throw new apiError(401,"invalid refresh TOken")
         }
-    
+        //else 210: throw error
         if(incomingRefreshToken !== user?.refreshToken){
             throw new apiError(401,"Refresh token is expired or used")
         }
@@ -216,7 +222,7 @@ const refreshAccessToken = asyncHandler(async (req,res) => {
             httpOnly:true,
             secure: true,
         }
-    
+        //generate new access token and new refresh token accordingly and send it back to user
         const {accessToken, newRefreshToken} = await generateAccessNRefreshToken(user._id)
     
         return res
@@ -241,6 +247,7 @@ const changeCurrentPassword = asyncHandler(async ( req,res) =>{
     //req.user?._id from auth middle ware we verify if user is logged in and hence proceed
     const user = await User.findById(req.user?._id)
 
+    //ispassword correct is from user model method 
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
     if(!isPasswordCorrect){
@@ -260,21 +267,22 @@ const getcurrentUser = asyncHandler ( async (req,res) =>{
 
 const updateDetails = asyncHandler(async (req,res) => {
     const {fullName , email} = req.body
-
+    //accept fullname and email from user and update it if email and password not there throw error
     if(!fullName || !email){
         throw new apiError(400,"required fields")
     }
-
+    //it is secure routes so req.user id should work or can keep a middle ware over here
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
+            //set fullname and email new one
             $set:{
                 fullName,
                 email: email
             }
         },
         {new:true}
-    ).select("-password")
+    ).select("-password") //delete password and send the response
 
     return res.status(200)
     .json(
@@ -282,6 +290,15 @@ const updateDetails = asyncHandler(async (req,res) => {
     )
 })
 
+
+/*
+update files avatar or coverImage:
+while uploading thru multer we store in diskstorage or locally so access using req.file
+if absent throw error
+upload on cloudinary method which gives us url
+check and throw error if missing
+find user thru middleware and set avatar or coverimage accordingly
+*/
 const updateUserAvatar = asyncHandler( async (req,res) =>{
     const avatarLocalPath = req.file?.path
 
