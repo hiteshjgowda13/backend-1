@@ -357,6 +357,85 @@ const updateUserCoverImage =asyncHandler(async(req,res) =>{
     )
 })
 
+const getUserChannelProfile = asyncHandler(async(req,res) =>{
+    //req.params contains url and gives us username we destructure it 
+    const {username} = req.params
+    //check if username is given or empty
+    if(!username?.trim()){
+        throw new apiError(400,"username is missing ")
+    }
+
+    //aggregate are sequence stages which execute one after another in db and it returns array
+    const channel = await User.aggregate([
+        {   //matches and gets document of username
+            $match:{
+                username: username?.toLowerCase()
+            }
+        },
+        {
+            $lookup:{
+                // $lookup joins data from another collection into this aggregation pipeline
+                from:"subscriptions", //in db all lower and plural
+                localField:"_id", //in the new return value we hav this as id
+                foreignField:"channel", // its looks on channel
+                as:"subscribers"//named as subsribers
+            }
+        },
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"subscriber",
+                as:"subscribedTo"
+            }
+        },
+        {
+            $addFields:{
+                subscribersCount:{
+                    $size: "$subscribers"
+                },
+                channelSubscribedToCount:{
+                    $size:"$subscribedTo"
+                },
+                isSubscribed:{
+                    $cond:{
+                        if: {$in: [req.user?._id, "$subscribers.subscriber" ]},
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project:{
+                //used to send selected fields not everything
+                fullName:1,
+                username:1,
+                subscribersCount:1,
+                channelSubscribedToCount:1,
+                isSubscribed:1,
+                avatar:1,
+                coverImage:1,
+                email:1
+            }
+        }
+    ])//for aggregate pipline 
+
+    if(!channel?.length){
+        throw new apiError(404,"Channel does not exist")
+    }
+    else{
+        console.log(channel) // array output for my checking 
+    }
+
+
+
+    return res.status(200)
+    .json(
+        new apiResponse(200,channel[0],"User channel fetched successfully")
+    )
+})//for function of getUserChannelProfile 
+
 export {
     registerUser,
     loginUser,
