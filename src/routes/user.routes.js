@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUser, logoutUser, registerUser, refreshAccessToken} from "../controllers/user.controller.js";
+import { loginUser, logoutUser, registerUser, refreshAccessToken, changeCurrentPassword, getcurrentUser, updateDetails, updateUserAvatar, updateUserCoverImage, getUserChannelProfile, getWatchHistory} from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -18,11 +18,20 @@ router.route("/register").post(
     ]),
     registerUser
 )
+
+
 router.route("/login").post(loginUser)
 
 
 //secured routes
 router.route("/logout").post(verifyJWT, logoutUser)
 router.route("/refresh-token").post(refreshAccessToken)
+router.route("/change-password").post(verifyJWT,changeCurrentPassword)
+router.route("/current-user").get(verifyJWT,getcurrentUser)
+router.route("/update-details").patch(verifyJWT,updateDetails)
+router.route("/avatar-change").patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
+router.route("/coverImage-change").patch(verifyJWT,upload.single("coverImage"),updateUserCoverImage)
+router.route("/c/:username").get(verifyJWT,getUserChannelProfile) //since its coming from param we use /c/:
+router.route("/history").get(verifyJWT,getWatchHistory)
 
 export default router
