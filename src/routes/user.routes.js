@@ -17,21 +17,22 @@ router.route("/register").post(
         }
     ]),
     registerUser
-)
+)//checked
 
 
-router.route("/login").post(loginUser)
+router.route("/login").post(loginUser)//checked
 
 
 //secured routes
-router.route("/logout").post(verifyJWT, logoutUser)
-router.route("/refresh-token").post(refreshAccessToken)
-router.route("/change-password").post(verifyJWT,changeCurrentPassword)
-router.route("/current-user").get(verifyJWT,getcurrentUser)
-router.route("/update-details").patch(verifyJWT,updateDetails)
-router.route("/avatar-change").patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
-router.route("/coverImage-change").patch(verifyJWT,upload.single("coverImage"),updateUserCoverImage)
+router.route("/logout").post(verifyJWT, logoutUser)//checked
+router.route("/refresh-token").post(refreshAccessToken)//checked only works if user is loggedin so jwt is required?
+router.route("/change-password").post(verifyJWT,changeCurrentPassword)//checked works fine 
+router.route("/current-user").get(verifyJWT,getcurrentUser)//checked 
+router.route("/update-details").patch(verifyJWT,updateDetails)//checked
+router.route("/avatar-change").patch(verifyJWT,upload.single("avatar"),updateUserAvatar)//checked 
+router.route("/coverImage-change").patch(verifyJWT,upload.single("coverImage"),updateUserCoverImage)//checked
 router.route("/c/:username").get(verifyJWT,getUserChannelProfile) //since its coming from param we use /c/:
+//above route works
 router.route("/history").get(verifyJWT,getWatchHistory)
 
 export default router
