@@ -263,7 +263,9 @@ const changeCurrentPassword = asyncHandler(async ( req,res) =>{
 
 const getcurrentUser = asyncHandler ( async (req,res) =>{
     return res.status(200)
-    .json(200,req.user,"current user fetched successfully")
+    .json(
+        new apiResponse(200,req.user,"user details fetched succesfully")
+    )
 })
 
 const updateDetails = asyncHandler(async (req,res) => {
@@ -301,6 +303,7 @@ check and throw error if missing
 find user thru middleware and set avatar or coverimage accordingly
 */
 const updateUserAvatar = asyncHandler( async (req,res) =>{
+    //checked and worked but cloudinary file is still there so shld delete it automatically
     const avatarLocalPath = req.file?.path
 
     if(!avatarLocalPath){
