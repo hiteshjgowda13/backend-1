@@ -2,6 +2,7 @@ import mongoose, {Schema} from "mongoose";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
+//Schema = blueprint + logic + rules
 const userSchema = new Schema(
     {
         username:{
@@ -11,6 +12,7 @@ const userSchema = new Schema(
             lowercase:true,
             trim:true,
             index:true
+            //without index db scans almost evrything so with index we avoid it as in lookups
         },
         email:{
             type: String,
@@ -54,7 +56,7 @@ const userSchema = new Schema(
 userSchema.pre("save", async function (next) {
     if(!this.isModified("password")) return 
 //happens only when password is changed
-    this.password = await bcrypt.hash(this.password,10)
+    this.password = await bcrypt.hash(this.password,10)//we hash not encrpt bcs encrypt can be decoded not hash 
 })
 
 //password verification using bcrypt 

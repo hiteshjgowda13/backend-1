@@ -7,7 +7,7 @@ dotenv.config({
     path: './env'
 })
 
-connectDB()
+connectDB()//accept it as a promise bcs if we do directly app.listen and there is db fail: server accepts req but not proccesed thru db
 .then( () => {
     app.listen(process.env.PORT || 4000, () =>{
         console.log(`Server is running at port : ${process.env.PORT}`)
