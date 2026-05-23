@@ -1,0 +1,31 @@
+import {Router} from 'express';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { upload } from '../middlewares/multer.middleware.js'
+import  {
+    uploadVideo,
+    getSingleVideo,
+    getAllVideos,
+    updateVideoDetails,
+    deleteVideo,
+    togglePublicStatus
+} from '../controllers/video.controller.js'    
+
+const router = Router();
+
+//secured routes: only logged in user can do this
+router.route("/upload-video").post(
+    verifyJWT,
+    upload.fields([ //fields required since this cant be accessed thru body params after this middle ware we send controller
+        {
+            name:"videoFile",
+            maxCount:1
+        },
+        {
+            name:"thumbnail",
+            maxCount:1
+        }
+    ]),
+    uploadVideo
+)
+
+export default router;

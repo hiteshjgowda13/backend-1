@@ -12,14 +12,16 @@ const videoSchema =  new Schema(
         },
         title:{
             type:String,
-            required:true
+            required:true,
+            trim:true
         },
         description:{
             type:String,
-            required:true
+            required:true,
+            trim:true
         },
         duration:{
-            type:String, //cloudaniray gives duration when video is uploaded
+            type:Number, //cloudaniray gives duration when video is uploaded
             required:true
         },
         views:{
@@ -33,6 +35,13 @@ const videoSchema =  new Schema(
         owner: {
             type:Schema.Types.ObjectId,
             ref: "User"
+            /* Video.findById(id).populate("owner","selected fields"):
+            returns 
+            "owner": {
+                "_id":"abc123",
+                "username":"hitesh",
+                "email":"..."
+             } */
         }
     },
     {
