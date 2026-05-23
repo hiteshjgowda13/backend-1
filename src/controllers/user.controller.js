@@ -63,7 +63,7 @@ const registerUser = asyncHandler( async(req,res) => {
     //multer gives path since avatar is required check for it again
     const avatarLocalPath = req.files?.avatar?.[0]?.path;
     //const coverImageLocalPath = req.files?.coverImage[0]?.path; complex and may lead to undefined which gives error later
-
+    //we do this since coverimage is not compulsory
     let coverImageLocalPath;
     if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length >0){
         coverImageLocalPath = req.files.coverImage[0].path

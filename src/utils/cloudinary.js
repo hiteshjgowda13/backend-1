@@ -26,3 +26,7 @@ const uploadCloudinary = async (localFilePath) => {
 }
 
 export {uploadCloudinary}
+
+/* well this code works only when file names are different 
+suggested fix: use unique file names for each upload 
+*/
