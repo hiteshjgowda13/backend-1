@@ -255,7 +255,58 @@ const deleteVideo = asyncHandler( async(req,res) =>{
 })
 
 const togglePublicStatus = asyncHandler( async(req,res) =>{
+    /* algorithm:
+    1. get videoID from params
+    2. check if video exists
+    3. check if user is the owner of the video
+    4. toggle the isPublished field
+    5. return updated video details
+    */
 
+    const {videoId} = req.params
+
+    if(!isValidObjectId(videoId)){
+        throw new apiError(400,"invalid objectID")
+    }
+
+    const video = await Video.findById(videoId).populate("owner","username avatar")
+
+    if(!video){
+        throw new apiError(404,"no video found for given ID")
+    }
+
+    if(video?.owner?._id.toString() !== req.user?._id.toString()){
+        throw new apiError(403,"unauthorized request")
+    }
+
+    // const updateFields ={}
+
+    // if(video.isPublished){
+    //     updateFields.isPublished =false
+    // }else{
+    //     updateFields.isPublished =true
+    // }
+
+    // const updatedVideo = await Video.findByIdAndUpdate(
+    //     videoId,
+    //     {
+    //         $set:updateFields
+    //     },
+    //     {
+    //         returnDocument:"after"
+    //     }
+    // ).populate("owner", "username avatar") db call is hitting twice optimize it
+
+    video.isPublished = !video.isPublished
+    await video.save()
+
+    return res.status(200)
+    .json(
+        new apiResponse(200,
+            video,
+            "toggled isPublished value succesffully"
+        )
+    )
 })
 
 export {

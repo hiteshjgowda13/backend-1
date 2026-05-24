@@ -41,4 +41,7 @@ router.route("/:videoId")
     updateVideoDetails
 )
 
+
+router.route("/toggle/publish/:videoId").post(verifyJWT,togglePublicStatus)
+
 export default router;
