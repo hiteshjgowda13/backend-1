@@ -12,7 +12,7 @@ import  {
 
 const router = Router();
 
-router.route("/c/:videoId").get(getSingleVideo)
+// router.route("/c/:videoId").get(getSingleVideo)
 router.route("/").get(getAllVideos) //since its coming from query we use /?search=abc
 
 
@@ -30,6 +30,15 @@ router.route("/upload-video").post(
         }
     ]),
     uploadVideo
+)
+// router.route("/uploadVideo/c/:videoId").patch(verifyJWT,upload.single("thumbnail"),updateVideoDetails)
+
+router.route("/:videoId")
+.get(getSingleVideo)
+.patch(
+    verifyJWT,
+    upload.single("thumbnail"),
+    updateVideoDetails
 )
 
 export default router;

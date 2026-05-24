@@ -171,7 +171,82 @@ const getAllVideos = asyncHandler( async (req,res) => {
 
 
 const updateVideoDetails = asyncHandler( async(req,res) =>{
+    /* algorithm:
+    1. get videoID from params directly check validty
+    2.get title or description or thumbnail as only this can updated
+    3.check if  either one is empty
+    4.take videoID then compare with owner and req.user._id
+    5.update video details then return
+    */
 
+    const {videoId} = req.params
+
+    if(!isValidObjectId(videoId)){
+        throw new apiError(404,"resource not found")
+    }
+
+    const video = await Video.findById(videoId)
+
+    if(!video){
+        throw new apiError(404,"no video found for given id")
+    }
+
+    if(video?.owner?.toString() !== req.user?._id.toString()) {
+        throw new apiError(403,"unauthorized request")
+    }
+
+    const {title,description} = req.body
+
+    let thumbnailLocalPath;//check if present then uploaded path is stored
+    if(req.file){
+        thumbnailLocalPath = req.file.path
+    }
+    /*req.files gives an array of files:which contents object
+    [{},{}]
+    each object:
+    {
+    fieldname: 'thumbnail',
+    path: we take this 
+    mimetype:
+    } */
+
+    if(!title && !description && !thumbnailLocalPath){
+        throw new apiError(400,"atleast one field is required")
+    }
+
+    const updateFields = {}
+
+    if(title){
+        updateFields.title = title
+    }
+    if(description){
+        updateFields.description = description
+    }
+    if(thumbnailLocalPath){
+        const thumbnail = await uploadCloudinary(thumbnailLocalPath)
+        if(!thumbnail){
+            throw new apiError(500,"error while uploading the file")
+        }
+        updateFields.thumbnail = thumbnail.url
+    }
+
+    const updatedVideo = await  Video.findByIdAndUpdate(
+        videoId,
+        {
+            $set:updateFields
+        },
+        {
+            returnDocument:"after"
+        }
+    ).populate("owner","username avatar")
+    
+    return res.status(200)
+    .json(
+        new apiResponse(200,
+            updatedVideo,
+            "video details updated succesffullly"
+        )
+    )
 })
 
 
