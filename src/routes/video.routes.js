@@ -12,6 +12,10 @@ import  {
 
 const router = Router();
 
+router.route("/c/:videoId").get(getSingleVideo)
+router.route("/").get(getAllVideos) //since its coming from query we use /?search=abc
+
+
 //secured routes: only logged in user can do this
 router.route("/upload-video").post(
     verifyJWT,

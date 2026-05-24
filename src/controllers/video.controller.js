@@ -79,14 +79,93 @@ const uploadVideo = asyncHandler( async (req,res) => {
 })
 
 
-const getSingleVideo = asyncHandler( async (req,res) => { //single video when search 
+const getSingleVideo = asyncHandler( async (req,res) => { //fetch single video
+    //algorithm to get single video:
+    //1.get video id from params and check if its valid object id
+    //2.find video in db and populate owner field with name and email
+    //3.if not found throw error else return response with video details
 
+    // get video using params :videoID
+    const { videoId } = req.params
+
+    if(!isValidObjectId(videoId)){
+        throw new apiError(404,"resource not found")
+    }
+
+    const video = await Video.findByIdAndUpdate( //this isnt how it works in backend 
+        //for now it whenever we fetch view increases so in real projects threshold watchtime is included:notice
+        videoId,
+        {
+            $inc:{
+                views: 1
+            }
+        },
+        {new:true} // returns updated doc not old one
+    ).populate("owner","username avatar")
+
+
+    if(!video){
+        throw new apiError(404,"no video found for given id")
+    }
+
+
+
+    return res.status(200)
+    .json(
+        new apiResponse(200,video,"video fetched sucessfully")
+    )
 })
 
 
 
 const getAllVideos = asyncHandler( async (req,res) => {
+    //algorithm to get all videos:
+    //1.get videos and videos/search are different 
+    //2.here we are doing based on search
+    //3.req.query gives the address in this way
+    //4.not using aggregate here bcs its complex 
+    //5.filter videos and give only ispublished true 
+    //5.if search exists after filter then regex on title 
+    //6.find video in db and populate owner field with username sort too
+    //7.return response with videos details well number of videos will be in array
 
+    const {search} = req.query
+    let videos
+    if(!search){
+        videos = await Video.find({
+            isPublished:true
+        }).populate("owner","username avatar")
+        .sort({ createdAt:-1})
+        .select("-description -updatedAt")
+    }
+    else{
+        videos = await Video.find({
+            isPublished: true,
+            title:{
+                $regex: search,
+                $options: "i" // searches for case insenstive and returns related fields
+            }
+        }).populate("owner","username avatar")
+        .sort({ createdAt:-1})
+        .select("-description -updatedAt")
+    }
+    
+    return res.status(200)
+    .json(
+        new apiResponse(200,videos,"videos fetched succesfully")
+    )
+    /*
+    for production level only one query no if else
+    const filter = {
+        isPublished:true
+     }
+     
+     if(search){
+        add regex title search
+     }
+     
+     run one query using filter
+      */
 })
 
 
