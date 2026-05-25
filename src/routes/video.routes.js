@@ -7,7 +7,8 @@ import  {
     getAllVideos,
     updateVideoDetails,
     deleteVideo,
-    togglePublicStatus
+    togglePublicStatus,
+    getMyvideos 
 } from '../controllers/video.controller.js'    
 
 const router = Router();
@@ -33,7 +34,10 @@ router.route("/upload-video").post(
 )
 // router.route("/uploadVideo/c/:videoId").patch(verifyJWT,upload.single("thumbnail"),updateVideoDetails)
 
-router.route("/:videoId")
+router.route("/get-my-videos").get(verifyJWT,getMyvideos)
+router.route("/delete/:videoId").delete(verifyJWT,deleteVideo)
+
+router.route("/:videoId") //this should be at last since it can conflict with other routes
 .get(getSingleVideo)
 .patch(
     verifyJWT,
@@ -43,5 +47,4 @@ router.route("/:videoId")
 
 
 router.route("/toggle/publish/:videoId").post(verifyJWT,togglePublicStatus)
-
 export default router;

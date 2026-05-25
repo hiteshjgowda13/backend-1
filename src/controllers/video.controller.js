@@ -251,7 +251,45 @@ const updateVideoDetails = asyncHandler( async(req,res) =>{
 
 
 const deleteVideo = asyncHandler( async(req,res) =>{
+    /* algorithm:
+    1.get VideoId from params
+    2.validate if its object id else return error
+    3.check if video exists esle error
+    4.validate video.owner.id and req.user.id
+    4.if same delete else throw error
+    5.use second query find by idanddelte */
 
+    const {videoId} = req.params
+
+    // if videoID is wrong or missing 24 char
+    if(!isValidObjectId(videoId)){
+        throw new apiError(404,"resource not found")
+    }
+    //find the video using the given id
+    const video = await Video.findById(videoId)
+    //return error if no video found
+    if(!video){
+        throw new apiError(404,"no video found for given id")
+    }
+    //validate owner and req.user._id
+    if(video?.owner?.toString() !== req.user?._id.toString()) {
+        throw new apiError(403,"unauthorized request")
+    }
+    //run query to directly delete from db as this does harddelete
+    await Video.findByIdAndDelete(videoId)
+    //return success if deleted else let await handle
+    return res.status(200)
+    .json(
+        new apiResponse(200,null,"video deleted successfully")
+    )
+
+    /*
+    this is harddelete function,but in producstion we do soft delete where in
+    in schema we add field is deleted type boolean default false we toggle when 
+    this route is clicked set a threshold for 30days check if user wants to restor
+    apply condition if deleted days>30 then deleete from mongodb too using time and date or smtng related
+    not sure
+    */
 })
 
 const togglePublicStatus = asyncHandler( async(req,res) =>{
@@ -309,11 +347,36 @@ const togglePublicStatus = asyncHandler( async(req,res) =>{
     )
 })
 
+const getMyvideos = asyncHandler( async(req,res) =>{
+    /*algorithm:
+    1. get the user ID from the request
+    2. find all videos where the owner is the logged-in user
+    also sort accordingly with latest video first
+    3. return the list of videos
+    */
+   const userId = req.user._id
+
+   const videos = await Video.find(
+        // owner. not this mongoose expects an object
+        {
+            owner:userId
+        }
+   ).populate("owner","username avatar")
+   .sort({updatedAt:-1})
+   .select("-description -createdAt")
+
+   return res.status(200)
+   .json(
+    new apiResponse(200,videos,"all user videos fetched")
+   )
+})
+
 export {
     uploadVideo,
     getSingleVideo,
     getAllVideos,
     updateVideoDetails,
     deleteVideo,
-    togglePublicStatus
+    togglePublicStatus,
+    getMyvideos 
 }
