@@ -11,11 +11,11 @@ const likeSchema = new Schema({
     },
     likedBy:{
         type:mongoose.Types.ObjectId,
-        ref="User"
+        ref:"User"
     },
     tweets:{
         type:mongoose.Types.ObjectId,
-        ref="Tweet"
+        ref:"Tweet"
     },
 },{timestamps:true})
 
