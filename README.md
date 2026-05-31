@@ -91,7 +91,6 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 All major endpoints were tested in Postman and verified manually.
 
-If you want to document the tests visually, add screenshots in a folder like `docs/` or `assets/` and reference them below.
 
 ## Screenshots
 
