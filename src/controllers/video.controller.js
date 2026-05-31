@@ -108,6 +108,18 @@ const getSingleVideo = asyncHandler( async (req,res) => { //fetch single video
         throw new apiError(404,"no video found for given id")
     }
 
+    // Track the fetched video in the logged-in user's watch history.
+    if(req.user?._id){
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $addToSet: {
+                    watchHistory: video._id
+                }
+            }
+        )
+    }
+
 
 
     return res.status(200)

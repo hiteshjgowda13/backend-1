@@ -38,7 +38,7 @@ router.route("/get-my-videos").get(verifyJWT,getMyvideos)
 router.route("/delete/:videoId").delete(verifyJWT,deleteVideo)
 
 router.route("/:videoId") //this should be at last since it can conflict with other routes
-.get(getSingleVideo)
+.get(verifyJWT,getSingleVideo)
 .patch(
     verifyJWT,
     upload.single("thumbnail"),
